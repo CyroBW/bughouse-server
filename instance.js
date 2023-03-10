@@ -32,11 +32,6 @@ export class Instance {
         this.setSocketCallback(); 
     }
 
-    setWebSocket(ws) {
-        this.ws = ws; 
-        this.setSocketCallback(); 
-    }
-
     setSocketCallback() {
         this.ws.on('message', async (data) => {
             const dataString = data.toString();  
@@ -183,6 +178,7 @@ export class Instance {
 
         await this.page.addInitScript({ path: './hook.js' });
         await this.page.goto('https://www.chess.com/play/online');
+        this.ws.send('connected');
 
         const client = await this.page.context().newCDPSession(this.page);
         await client.send('Network.enable');
