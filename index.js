@@ -1,7 +1,6 @@
 //'use strict';
 import { chromium } from "playwright-core";
 import express from "express";
-import http from "http";
 import { WebSocketServer } from "ws";
 import { Instance } from "./instance.js";
 
@@ -25,8 +24,8 @@ wss.on("connection", async function connection(ws, req) {
     const credentials = req.url.split('?')[1].split('&'); 
     const username = credentials[0].split('=')[1];
     const password = credentials[1].split('=')[1];
-    
-    const browser = await chromium.launch();
+
+    const browser = await chromium.launch({ chromiumSandbox: false });
     instances[ip] = new Instance(ws, browser, username, password); 
     await instances[ip].start();
   });              
