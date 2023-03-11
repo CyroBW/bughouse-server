@@ -118,25 +118,6 @@ function chunkSubstr(str, size) {
     return chunks
 }
 
-const PAWN_OFFSETS = {
-    b: [16, 32, 17, 15],
-    w: [-16, -32, -17, -15],
-}
-  
-const PIECE_OFFSETS = {
-    n: [-18, -33, -31, -14, 18, 33, 31, 14],
-    b: [-17, -15, 17, 15],
-    r: [-16, 1, 16, -1],
-    q: [-17, -16, -15, 1, 17, 16, 15, -1],
-    k: [-17, -16, -15, 1, 17, 16, 15, -1],
-}
-
-function algebraic(square) {
-    const f = square & 0xf
-    const r = square >> 4
-    return ("abcdefgh".substring(f, f + 1) +
-        "87654321".substring(r, r + 1));
-}
 const startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 export class Board {
@@ -230,78 +211,6 @@ export class Board {
 
     getFenWithHand() {
         return this.fen[0].replace(" ", "[" + this.whitehand.toUpperCase() + this.blackhand.toLowerCase() + "] "); 
-    }
-
-    getScrambleMove() {
-        const us = this.board[0].turn();
-        const them = (this.board[0].turn() === "w") ? "b" : "w"; 
-        const from = this.board[0]._kings[them];
-        const hand = (this.board[0].turn() === "w") ? this.whitehand.toLowerCase() : this.blackhand.toLowerCase();
-        const dropChecks = []; 
-
-        let to; 
-        for (const type of [...new Set(hand)]) {
-            if (type === "p") {        
-                for (let j = 2; j < 4; j++) {
-                  to = from + PAWN_OFFSETS[them][j]
-                  if (to & 0x88) continue
-                  const toSquare = algebraic(to); 
-                  if (!this.board[0].get(toSquare)) {
-                      this.board[0].put({ type: type, color: this.board[0].turn() }, toSquare);
-                      if (this.board[0]._isKingAttacked(them) && !this.board[0]._isKingAttacked(us)) {
-                          dropChecks.push(type + "@" + toSquare); 
-                      }
-                      this.board[0].remove(toSquare);
-                  }
-                }
-            } 
-            else {
-                for (let j = 0, len = PIECE_OFFSETS[type].length; j < len; j++) {
-                    const offset = PIECE_OFFSETS[type][j]
-                    to = from
-                    while (true) {
-                        to += offset
-                        if (to & 0x88) break
-                        const toSquare = algebraic(to); 
-                        if (!this.board[0].get(toSquare)) {
-                            this.board[0].put({ type: type, color: this.board[0].turn() }, toSquare);
-                            if (this.board[0]._isKingAttacked(them) && !this.board[0]._isKingAttacked(us)) {
-                                dropChecks.push(type + "@" + toSquare); 
-                            }
-                            this.board[0].remove(toSquare);
-                        }
-                        if (type === "n" || type === "k") break
-                    }
-                }
-            }
-        }
-
-        if (dropChecks.length > 0) {
-            return dropChecks[Math.floor(Math.random() * dropChecks.length)];
-        }
-
-        const moves = this.board[0].moves({ verbose: true });
-        let res; 
-        for (const move of moves) {
-            if (move.san.includes("+")) {
-                res = move.from + move.to;
-                if (move.promotion !== undefined) {
-                    res += move.promotion; 
-                }
-                return res; 
-            }
-        }
-
-        for (const move of moves) {
-            if (move.piece === "k") {
-                return move.from + move.to;
-            }
-        }
-
-        if (moves.length > 0) {
-            const move = moves[Math.floor(Math.random() * moves.length)];
-            return move.from + move.to;
-        }
     }
 }
 
