@@ -27,7 +27,10 @@ wss.on("connection", async function connection(ws, req) {
     const username = credentials[0].split('=')[1];
     const password = credentials[1].split('=')[1];
 
-    instances[ip] = new Instance(ws, browser, username, password); 
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+    });
+    instances[ip] = new Instance(ws, context, username, password); 
     await instances[ip].start();
   });              
 

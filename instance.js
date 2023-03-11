@@ -3,9 +3,9 @@ import { Board, encode, decode } from './board.js';
 import { Book } from './book.js';
 
 export class Instance {
-    constructor(ws, browser, username, password) {
+    constructor(ws, context, username, password) {
         this.ws = ws; 
-        this.browser = browser;
+        this.context = context;
         this.username = username; 
         this.password = password;
         this.book = new Book(); 
@@ -128,7 +128,7 @@ export class Instance {
 
         this.ws.on('close', async (event) => {
             console.log(this.ws._socket.remoteAddress + ' disconnected!');
-            this.browser.close(); 
+            this.context.close(); 
         });
     }
 
@@ -165,11 +165,7 @@ export class Instance {
     }
 
     async start() {
-        const context = await this.browser.newContext({
-            userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-          });
-    
-        this.page = await context.newPage();
+        this.page = await this.context.newPage();
         await this.page.goto('https://www.chess.com/login_and_go?returnUrl=https://www.chess.com/');
     
         await this.page.type('input[id="username"]', this.username); 
