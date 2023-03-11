@@ -172,8 +172,8 @@ export class Instance {
         this.page = await context.newPage();
         await this.page.goto('https://www.chess.com/login_and_go?returnUrl=https://www.chess.com/');
     
-        await this.page.type('input[id="username"]', 'ericturner33'); 
-        await this.page.type('input[id="password"]', 'Qwerty12'); 
+        await this.page.type('input[id="username"]', this.username); 
+        await this.page.type('input[id="password"]', this.password); 
         await this.page.click('button[id="login"]'),
 
         await this.page.addInitScript({ path: './hook.js' });

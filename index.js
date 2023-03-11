@@ -14,6 +14,7 @@ const server = http.createServer(app);
 server.listen(port);
 
 const wss = new WebSocketServer({ server: server });
+const browser = await chromium.launch({ chromiumSandbox: false });
 
 wss.on("connection", async function connection(ws, req) {
     setInterval(function() {
@@ -26,7 +27,6 @@ wss.on("connection", async function connection(ws, req) {
     const username = credentials[0].split('=')[1];
     const password = credentials[1].split('=')[1];
 
-    const browser = await chromium.launch({ chromiumSandbox: false });
     instances[ip] = new Instance(ws, browser, username, password); 
     await instances[ip].start();
   });              
