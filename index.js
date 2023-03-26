@@ -1,7 +1,11 @@
 //'use strict';
 import { chromium } from "playwright-core";
+import { Instance } from "./instance.js";
 
 (async () => {
+    const username = 'ripintherp';
+    const password = 'Chess123';
+
     const browser = await chromium.launch({ chromiumSandbox: false });
     const context = await browser.newContext({
       userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'

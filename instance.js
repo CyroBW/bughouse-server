@@ -24,7 +24,6 @@ export class Instance {
         this.predrops = []; 
         this.following = [];    
         this.playing = false; 
-        this.start(); 
     }
 
     async triggerPremoves() {
@@ -61,7 +60,7 @@ export class Instance {
 
     async start() {
         this.page = await this.context.newPage();
-        await this.page.goto('https://www.chess.com/login_and_go?returnUrl=https://www.chess.com/');
+        await this.page.goto('https://www.chess.com/login');
     
         await this.page.type('input[id="username"]', this.username); 
         await this.page.type('input[id="password"]', this.password); 
@@ -77,6 +76,7 @@ export class Instance {
         client.on('Network.webSocketFrameReceived', async (message) => {
             if (message.response.payloadData[0] === '[') {
                 const data = JSON.parse(message.response.payloadData)[0];
+                console.log(data); 
 
                 if ('clientId' in data) {
                     this.clientId = data.clientId;
