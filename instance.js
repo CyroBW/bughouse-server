@@ -71,7 +71,7 @@ export class Instance {
 
         const client = await this.page.context().newCDPSession(this.page);
         await client.send('Network.enable');
-        await client.send('Page.enable');   
+        await client.send('Page.enable'); 
 
         client.on('Network.webSocketFrameReceived', async (message) => {
             if (message.response.payloadData[0] === '[') {
@@ -114,23 +114,11 @@ export class Instance {
                             this.board.setBlackhand(data.data.game.blackhand);
                         }
 
-                        if (this.playing && this.userSide === this.sideToMove) {
+                        if (this.playing && this.userSide === this.sideToMove) { // Your turn!
                             if (fen) {
                                 this.startTime = Date.now();
                             }
                             this.triggerPremoves(); 
-                            if (this.useBook && this.userSide === this.sideToMove && this.ply < 20) {
-                                const move = this.book.get(this.board.getFenWithHand()); 
-                                if (move) {
-                                    this.sendMove(move); 
-                                }
-                            }
-                            if (this.userSide === this.sideToMove && this.scramble) {
-                                const move = this.board.getScrambleMove();
-                                if (move) {
-                                    this.sendMove(move); 
-                                }
-                            }
                         }
                     }
                     else {
