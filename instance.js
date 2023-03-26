@@ -20,42 +20,8 @@ export class Instance {
         this.whitehand2 = '';
         this.blackhand2 = ''; 
         this.partner = ''; 
-        this.premoves = []; 
-        this.predrops = []; 
         this.following = [];    
         this.playing = false; 
-    }
-
-    async triggerPremoves() {
-        let premove = this.premoves[0]; 
-        let predrop = this.predrops[0]; 
-        if (predrop) {
-            for (let i = 0; i < this.premoves.length; i++) {
-                if (this.predrops[i] && this.board.isLegal(this.premoves[i])) {
-                    this.sendMove(this.premoves[i]);
-                    for (let j = 0; j <= i; j++) {
-                        this.premoves.shift(); 
-                        this.predrops.shift(); 
-                    }
-                    break;
-                }
-            }
-        }
-        else {
-            while (this.premoves.length > 0) {
-                premove = this.premoves.shift();
-                predrop = this.predrops.shift(); 
-                if (this.board.isLegal(premove)) {
-                    this.sendMove(premove);
-                    break;
-                }
-                else if (predrop) {
-                    this.premoves.unshift(premove); 
-                    this.predrops.unshift(predrop); 
-                    break; 
-                }
-            }
-        }
     }
 
     async start() {
@@ -80,6 +46,8 @@ export class Instance {
 
                 if ('clientId' in data) {
                     this.clientId = data.clientId;
+                    this.seekGame(1800); 
+                    //this.sendPartnershipRequest('username'); 
                 }
         
                 if (data.data && data.data.game && data.data.game.players && data.data.game.clocks) {
@@ -100,7 +68,7 @@ export class Instance {
                             this.playing = true; 
                         }
                         const fen = this.board.getFEN(data.data.game.moves, 0);
-                        if (fen) { // New position
+                        if (fen) { 
                             this.playing = true; 
                         }
                         
@@ -118,7 +86,6 @@ export class Instance {
                             if (fen) {
                                 this.startTime = Date.now();
                             }
-                            this.triggerPremoves(); 
                         }
                     }
                     else {
@@ -221,4 +188,23 @@ export class Instance {
             cometSocket.send(JSON.stringify(data));
         }, [time, this.clientId, this.username, minRating, maxRating]);
     } 
+
+    async sendPartnershipRequest(target) { 
+        await this.page.evaluate(([clientId, target, username]) => {
+            const cometSocket = window.websockets.find((ws) => ws.url.includes('cometd'));
+            const data = [
+                {
+                    'channel': '/service/game',
+                    'data': {
+                        'from': username,
+                        'tid': 'RequestBughousePair',
+                        'to': target
+                    },
+                    'id': window.nextMessageId(),
+                    'clientId': clientId
+                }
+            ]
+            cometSocket.send(JSON.stringify(data));
+        }, [this.clientId, target, this.username]);
+    }
 }
